@@ -7,6 +7,7 @@ const { queryToFetchAvailableProducts, queryToFetchSingleProduct } = require('./
 
 app.use(cors());
 app.use(bodyParser.json());
+console.log('testing');
 
 const GRAPHQL_STOREFRONT_API = `https://${process.env.SHOPIFY_DOMAIN}/api/2023-10/graphql.json`;
 const GRAPHQL_ADMIN_API = `https://${process.env.SHOPIFY_DOMAIN}/admin/api/2023-10/orders.json`;
