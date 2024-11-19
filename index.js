@@ -118,13 +118,13 @@ app.post('/calculateShipping', (req, res) => {
         {
             id: 'standard',
             label: 'Standard Shipping (5-7 business days)',
-            amount: 500,  // Amount in cents
+            amount: 0,  // Amount in cents
             description: 'Standard shipping rate'
         },
         {
             id: 'express',
             label: 'Express Shipping (2-3 business days)',
-            amount: 1000, // Amount in cents
+            amount: 5, // Amount in cents
             description: 'Express shipping rate'
         }
     ];
