@@ -13,4 +13,16 @@ const logger = winston.createLogger({
     ],
 });
 
-module.exports = logger;
+const siteLogger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        new winston.transports.File({ filename: '/var/www/destiny-product-site/logs/application.log' }),
+        new winston.transports.Console()
+    ],
+});
+
+module.exports = { logger, siteLogger };

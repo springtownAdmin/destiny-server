@@ -4,7 +4,7 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const { queryToFetchAvailableProducts, queryToFetchSingleProduct } = require('./graphql-queries');
-const logger = require('./logger');
+const { logger, siteLogger } = require('./logger');
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -331,7 +331,7 @@ app.get('/api/products', async (req, res) => {
 // Endpoint to log on client-side code
 app.post('/api/logs', (req, res) => {
     const { level, message, meta } = req.body;
-    logger.log({ level, message, meta });
+    siteLogger.log({ level, message, meta });
     res.status(200).send('Log received');
 });
 
