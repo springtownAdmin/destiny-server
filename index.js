@@ -337,8 +337,9 @@ app.post('/api/logs', (req, res) => {
         siteLogger.info(message);
     } else if (level === 'error') {
         siteLogger.error(message);
+    } else if (level === 'warn') {
+        siteLogger.warn(message);
     }
-    // siteLogger.log({ level, message });
 
     return res.status(200).json({ message: 'Log received' });
 
