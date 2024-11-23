@@ -340,7 +340,7 @@ app.post('/api/logs', (req, res) => {
     }
     // siteLogger.log({ level, message });
 
-    res.status(200).json({ message: 'Log received' });
+    return res.status(200).json({ message: 'Log received' });
 
 });
 
