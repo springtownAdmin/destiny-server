@@ -328,6 +328,13 @@ app.get('/api/products', async (req, res) => {
 
 });
 
+// Endpoint to log on client-side code
+app.post('/api/logs', (req, res) => {
+    const { level, message, meta } = req.body;
+    logger.log({ level, message, meta });
+    res.status(200).send('Log received');
+});
+
 // Listening on port 8000
 app.listen(8000, () => {
 
