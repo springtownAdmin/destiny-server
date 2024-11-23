@@ -124,7 +124,7 @@ app.post('/calculateShipping', (req, res) => {
         {
             id: 'express',
             label: 'Express Shipping (2-3 business days)',
-            amount: 5, // Amount in cents
+            amount: 2000, // Amount in cents
             description: 'Express shipping rate'
         }
     ];
