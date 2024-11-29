@@ -30,8 +30,8 @@ app.post('/webhooks/order-payment', (req, res) => {
         .digest('base64');
 
     logger.info('=========================================>\n');
-    logger.info('=> CALCULATED HMAC = ', calculatedHmac);
-    logger.info("=> HMACHEADER = ", hmacHeader);
+    logger.info(calculatedHmac);
+    logger.info(hmacHeader);
     logger.info('=========================================>\n');
 
     if (calculatedHmac === hmacHeader) {
