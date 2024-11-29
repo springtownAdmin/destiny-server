@@ -25,7 +25,7 @@ app.post('/webhooks/order-payment', (req, res) => {
 
     // Validate webhook using Shopify's HMAC method
     const calculatedHmac = crypto
-        .createHmac('sha256', SHOPIFY_SECRET)
+        .createHmac('sha256', process.env.SHOPIFY_WEBHOOK_SECRET)
         .update(JSON.stringify(receivedData))
         .digest('base64');
 
