@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser')
 const { queryToFetchAvailableProducts, queryToFetchSingleProduct } = require('./graphql-queries');
 const { logger, siteLogger } = require('./logger');
+const crypto = require('crypto');
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -15,6 +16,45 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
 
 const GRAPHQL_STOREFRONT_API = `https://${process.env.SHOPIFY_DOMAIN}/api/2023-10/graphql.json`;
 const GRAPHQL_ADMIN_API = `https://${process.env.SHOPIFY_DOMAIN}/admin/api/2023-10/orders.json`;
+
+// Webhook to check whether order is created or not
+app.post('/webhooks/order-payment', (req, res) => {
+
+    const receivedData = req.body;
+    const hmacHeader = req.get('X-Shopify-Hmac-Sha256');  // HMAC signature for security validation
+
+    // Validate webhook using Shopify's HMAC method
+    const calculatedHmac = crypto
+        .createHmac('sha256', SHOPIFY_SECRET)
+        .update(JSON.stringify(receivedData))
+        .digest('base64');
+
+    if (calculatedHmac === hmacHeader) {
+
+        logger.info('=========================================>\n');
+        logger.info('WEBHOOK_DATA_IS_VALID!\n');
+        logger.info('=========================================>\n');
+        logger.info(receivedData, '\n');
+        logger.info('=========================================>\n');
+
+        // Here you can calculate conversions or perform any tracking logic
+        // For example, send the data to Google Analytics or your own analytics service
+
+
+        // Send success response back to Shopify
+        res.status(200).json({ message: 'Webhook received!' });
+
+    } else {
+
+        logger.info('=========================================>\n');
+        logger.info('INVALID_WEBHOOK_DATA!\n');
+        logger.info('=========================================>\n');
+        res.status(400).json({ message: 'Invalid request!' });
+
+    }
+
+});
+
 
 app.post('/create-payment-intent', async (req, res) => {
 
