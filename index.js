@@ -16,6 +16,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
 
 const GRAPHQL_STOREFRONT_API = `https://${process.env.SHOPIFY_DOMAIN}/api/2023-10/graphql.json`;
 const GRAPHQL_ADMIN_API = `https://${process.env.SHOPIFY_DOMAIN}/admin/api/2023-10/orders.json`;
+const GRAPHQL_ADMIN_ORDERS_API = `https://${process.env.SHOPIFY_DOMAIN}/admin/api/2023-10/orders`;
 
 // Webhook to check whether order is created or not
 app.post('/webhooks/order-payment', (req, res) => {
@@ -26,12 +27,24 @@ app.post('/webhooks/order-payment', (req, res) => {
     // Validate webhook using Shopify's HMAC method
     const calculatedHmac = crypto
         .createHmac('sha256', process.env.SHOPIFY_WEBHOOK_SECRET)
-        .update(JSON.stringify(receivedData))
+        .update(receivedData)
         .digest('base64');
+
+
+    // Log the raw received data and the stringified version
+    console.log('Received Webhook Data:', req.body);
+    console.log('Stringified Received Data:', receivedData);
+
+    logger.info("Received webhook data");
+    logger.info(req.body);
+    logger.info("Stringified received data");
+    logger.info(receivedData);
 
     logger.info('=========================================>\n');
     logger.info(calculatedHmac);
     logger.info(hmacHeader);
+    logger.info("V this is the received data from order-payment:")
+    logger.info(receivedData);
     logger.info('=========================================>\n');
 
     if (calculatedHmac === hmacHeader) {
@@ -59,7 +72,6 @@ app.post('/webhooks/order-payment', (req, res) => {
     }
 
 });
-
 
 app.post('/create-payment-intent', async (req, res) => {
 
@@ -166,13 +178,15 @@ app.post("/create-shopify-order", async (req, res) => {
         }
 
         const response = await fetch(GRAPHQL_ADMIN_API, options);
-
+        logger.info('=========================================>\n');
+        logger.info('checking response object\n');
+        logger.info(response);
         if (!response.ok) {
 
             logger.info('=========================================>\n');
             logger.info('ERROR_WHILE_CREATING_SHOPIFY_ORDER\n');
             logger.info('=========================================>\n');
-            logger.error(response, '\n');
+            logger.error(response);
             logger.info('=========================================>\n');
 
             throw new Error(`Shopify order creation failed with status ${response.status}`);
@@ -198,7 +212,101 @@ app.post("/create-shopify-order", async (req, res) => {
         logger.info('=========================================>\n');
         logger.info('ERROR_WHILE_CREATING_SHOPIFY_ORDER\n');
         logger.info('=========================================>\n');
-        logger.error(error, '\n');
+        logger.error(error);
+        logger.info('=========================================>\n');
+        res.status(500).json({ error: "Failed to create Shopify order" });
+
+    }
+
+});
+
+app.post("/test-order", async (req, res) => {
+
+    try {
+
+        // Construct the Shopify order payload
+        const shopifyOrderData = {
+            order: {
+                line_items: [
+                    {
+                        variant_id: 46075169931421,
+                        quantity: 1
+                    },
+                ],
+                inventory_behaviour: "decrement_obeying_policy",
+                customer: {
+                    first_name: "John",
+                    last_name: "Doe",
+                    email: "johndoe@gmail.com",
+                },
+                shipping_address: {
+                    first_name: "John",
+                    last_name: "Doe",
+                    address1: "104 Washington Place",
+                    address2: "Apt 3",
+                    city: "New York",
+                    province: "NY",
+                    country: "US",
+                    zip: "10014",
+                },
+                billing_address: {
+                    first_name: "John",
+                    last_name: "Doe",
+                    address1: "116 Buccaneer St",
+                    address2: "A",
+                    city: "Marina De La Rey",
+                    province: "CA",
+                    country: "US",
+                    zip: "90292",
+                },
+                financial_status: "paid",
+            },
+        };
+
+        const options = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_ACCESS_TOKEN,
+            },
+            body: JSON.stringify(shopifyOrderData)
+        }
+
+        const response = await fetch(GRAPHQL_ADMIN_API, options);
+
+        if (!response.ok) {
+
+            logger.info('=========================================>\n');
+            logger.info('ERROR_WHILE_CREATING_TEST_ORDER\n');
+            logger.info('=========================================>\n');
+            logger.error(response);
+            logger.info('=========================================>\n');
+
+            throw new Error(`Shopify order creation failed with status ${response.status}`);
+
+        }
+
+        const orderData = await response.json();
+
+        logger.info('=========================================>\n');
+        logger.info('SHOPIFY_TEST_ORDER_DATA\n');
+        logger.info('=========================================>\n');
+        logger.info(orderData, '\n');
+        logger.info('=========================================>\n');
+
+        res.status(200).json({
+            message: "Shopify order created successfully",
+            orderId: orderData.order.id,
+            order: orderData.order,
+        });
+
+
+    } catch (e) {
+
+        logger.info('=========================================>\n');
+        logger.info('ERROR_WHILE_CREATING_SHOPIFY_TEST_ORDER\n');
+        logger.info('=========================================>\n');
+        logger.error(error);
         logger.info('=========================================>\n');
         res.status(500).json({ error: "Failed to create Shopify order" });
 
