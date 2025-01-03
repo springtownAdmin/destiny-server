@@ -35,25 +35,7 @@ app.post('/webhooks/order-payment', (req, res) => {
     console.log('Received Webhook Data:', req.body);
     console.log('Stringified Received Data:', receivedData);
 
-    logger.info("Received webhook data");
-    logger.info(req.body);
-    logger.info("Stringified received data");
-    logger.info(receivedData);
-
-    logger.info('=========================================>\n');
-    logger.info(calculatedHmac);
-    logger.info(hmacHeader);
-    logger.info("V this is the received data from order-payment:")
-    logger.info(receivedData);
-    logger.info('=========================================>\n');
-
     if (calculatedHmac === hmacHeader) {
-
-        logger.info('=========================================>\n');
-        logger.info('WEBHOOK_DATA_IS_VALID!\n');
-        logger.info('=========================================>\n');
-        logger.info(receivedData, '\n');
-        logger.info('=========================================>\n');
 
         // Here you can calculate conversions or perform any tracking logic
         // For example, send the data to Google Analytics or your own analytics service
@@ -63,10 +45,6 @@ app.post('/webhooks/order-payment', (req, res) => {
         res.status(200).json({ message: 'Webhook received!' });
 
     } else {
-
-        logger.info('=========================================>\n');
-        logger.info('INVALID_WEBHOOK_DATA!\n');
-        logger.info('=========================================>\n');
         res.status(400).json({ message: 'Invalid request!' });
 
     }
@@ -92,23 +70,12 @@ app.post('/create-payment-intent', async (req, res) => {
             },
         });
 
-        logger.info('=========================================>\n');
-        logger.info('STRIPE_PAYMENT_INTENT\n');
-        logger.info('=========================================>\n');
-        logger.info(paymentIntent, '\n');
-        logger.info('=========================================>\n');
-
         // Send the client_secret to the client
         res.json({ clientSecret: paymentIntent.client_secret });
 
 
     } catch (error) {
-
-        logger.info('=========================================>\n');
-        logger.info('ERROR_WHILE_CREATING_STRIPE_PAYMENT_INTENT\n');
-        logger.info('=========================================>\n');
-        logger.error(error, '\n');
-        logger.info('=========================================>\n');
+        // logger.error(error, '\n');
 
         res.status(500).json({ error: 'Failed to create PaymentIntent' });
 
@@ -160,12 +127,6 @@ app.post("/create-shopify-order", async (req, res) => {
         },
     };
 
-    logger.info('=========================================>\n');
-    logger.info('SHOPIFY_ORDER_PAYLOAD\n');
-    logger.info('=========================================>\n');
-    logger.info(shopifyOrderData, '\n');
-    logger.info('=========================================>\n');
-
     try {
 
         const options = {
@@ -178,28 +139,16 @@ app.post("/create-shopify-order", async (req, res) => {
         }
 
         const response = await fetch(GRAPHQL_ADMIN_API, options);
-        logger.info('=========================================>\n');
-        logger.info('checking response object\n');
-        logger.info(response);
         if (!response.ok) {
 
-            logger.info('=========================================>\n');
-            logger.info('ERROR_WHILE_CREATING_SHOPIFY_ORDER\n');
-            logger.info('=========================================>\n');
             logger.error(response);
-            logger.info('=========================================>\n');
+
 
             throw new Error(`Shopify order creation failed with status ${response.status}`);
 
         }
 
         const orderData = await response.json();
-
-        logger.info('=========================================>\n');
-        logger.info('SHOPIFY_ORDER_DATA\n');
-        logger.info('=========================================>\n');
-        logger.info(orderData, '\n');
-        logger.info('=========================================>\n');
 
         res.status(200).json({
             message: "Shopify order created successfully",
@@ -209,11 +158,7 @@ app.post("/create-shopify-order", async (req, res) => {
 
     } catch (error) {
 
-        logger.info('=========================================>\n');
-        logger.info('ERROR_WHILE_CREATING_SHOPIFY_ORDER\n');
-        logger.info('=========================================>\n');
         logger.error(error);
-        logger.info('=========================================>\n');
         res.status(500).json({ error: "Failed to create Shopify order" });
 
     }
@@ -275,12 +220,8 @@ app.post("/test-order", async (req, res) => {
         const response = await fetch(GRAPHQL_ADMIN_API, options);
 
         if (!response.ok) {
+            // logger.error(response);
 
-            logger.info('=========================================>\n');
-            logger.info('ERROR_WHILE_CREATING_TEST_ORDER\n');
-            logger.info('=========================================>\n');
-            logger.error(response);
-            logger.info('=========================================>\n');
 
             throw new Error(`Shopify order creation failed with status ${response.status}`);
 
@@ -288,11 +229,6 @@ app.post("/test-order", async (req, res) => {
 
         const orderData = await response.json();
 
-        logger.info('=========================================>\n');
-        logger.info('SHOPIFY_TEST_ORDER_DATA\n');
-        logger.info('=========================================>\n');
-        logger.info(orderData, '\n');
-        logger.info('=========================================>\n');
 
         res.status(200).json({
             message: "Shopify order created successfully",
@@ -302,12 +238,8 @@ app.post("/test-order", async (req, res) => {
 
 
     } catch (e) {
-
-        logger.info('=========================================>\n');
-        logger.info('ERROR_WHILE_CREATING_SHOPIFY_TEST_ORDER\n');
-        logger.info('=========================================>\n');
         logger.error(error);
-        logger.info('=========================================>\n');
+
         res.status(500).json({ error: "Failed to create Shopify order" });
 
     }
@@ -320,9 +252,6 @@ app.post('/calculateShipping', (req, res) => {
 
     // Check if the country is supported
     if (shippingAddress.country !== 'US') {
-        logger.info('=========================================>\n');
-        logger.info('SHIPPING_ADDRESS_MUST_CONTAINS_(US)_ADDRESS\n');
-        logger.info('=========================================>\n');
         return res.status(400).json({ status: 'invalid_shipping_address' });
     }
 
@@ -368,12 +297,7 @@ app.get('/api/products/:id', async (req, res) => {
         const response = await fetch(GRAPHQL_STOREFRONT_API, options);
 
         if (!response.ok) {
-
-            logger.info('=====================================================>\n');
-            logger.info('ERROR_WHILE_CALLING_STOREFRONT_API_FOR_ONE_PRODUCT\n');
-            logger.info('=====================================================>\n');
             logger.error(response, '\n');
-            logger.info('=====================================================>\n');
 
             throw new Error('Network response was not ok');
 
@@ -381,12 +305,6 @@ app.get('/api/products/:id', async (req, res) => {
 
         const data = await response.json();
         const originalData = data.data;
-
-        logger.info('==================================================>\n');
-        logger.info('STOREFRONT_API_RESPONSE_FOR_FETCHING_ONE_PRODUCT\n');
-        logger.info('==================================================>\n');
-        logger.info(data, '\n');
-        logger.info('==================================================>\n');
 
         const formattedData = {
             product: {
@@ -404,11 +322,7 @@ app.get('/api/products/:id', async (req, res) => {
 
     } catch (error) {
 
-        logger.info('=====================================================>\n');
-        logger.info('ERROR_WHILE_FETCHING_ONE_PRODUCT\n');
-        logger.info('=====================================================>\n');
         logger.error(error, '\n');
-        logger.info('=====================================================>\n');
 
         res.status(500).send('Error fetching product');
 
@@ -436,23 +350,12 @@ app.get('/api/products', async (req, res) => {
 
         if (!response.ok) {
 
-            logger.info('=====================================================>\n');
-            logger.info('ERROR_WHILE_FETCHING_PRODUCTS\n');
-            logger.info('=====================================================>\n');
-            logger.info(response, '\n');
-            logger.info('=====================================================>\n');
-
             throw new Error('Network response was not ok');
 
         }
 
         const data = await response.json();
 
-        logger.info('=====================================================>\n');
-        logger.info('RESPONSE_FROM_STOREFRONT_API_FOR_GETTING_PRODUCTS\n');
-        logger.info('=====================================================>\n');
-        logger.info(data, '\n');
-        logger.info('=====================================================>\n');
 
         const products = data.data.products.edges.map(edge => ({
             id: edge.node.id,
@@ -469,11 +372,8 @@ app.get('/api/products', async (req, res) => {
 
     } catch (error) {
 
-        logger.info('=====================================================>\n');
-        logger.info('ERROR_WHILE_FETCHING_PRODUCTS\n');
-        logger.info('=====================================================>\n');
-        logger.error(error, '\n');
-        logger.info('=====================================================>\n');
+        // logger.error(error, '\n');
+
 
         res.status(500).send('Error fetching products');
 
@@ -486,13 +386,13 @@ app.post('/api/logs', (req, res) => {
 
     const { level, message, meta } = req.body;
 
-    if (level === 'info') {
-        siteLogger.info(message);
-    } else if (level === 'error') {
-        siteLogger.error(message);
-    } else if (level === 'warn') {
-        siteLogger.warn(message);
-    }
+    // if (level === 'info') {
+    //     siteLogger.info(message);
+    // } else if (level === 'error') {
+    //     siteLogger.error(message);
+    // } else if (level === 'warn') {
+    //     siteLogger.warn(message);
+    // }
 
     return res.status(200).json({ message: 'Log received' });
 
@@ -500,11 +400,7 @@ app.post('/api/logs', (req, res) => {
 
 // Listening on port 8000
 app.listen(8000, () => {
-
-    logger.info('=====================================================>\n');
-    logger.info('SERVER_RUNNING_INFO\n');
-    logger.info('=====================================================>\n');
-    logger.info(`${process.env.ENV === 'dev' ? process.env.DEV_URL : process.env.PROD_URL}`, '\n');
-    logger.info('=====================================================>\n');
+    console.log('server is running on port 8000');
+    
 
 });
